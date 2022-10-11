@@ -1,0 +1,118 @@
+openapi: "3.0.0"
+
+info:
+  title: "Sample API"
+  description: |
+    # Features
+    - Getサンプル.
+    - Postサンプル.
+  termsOfService: "https://example.com/"
+  # contact:
+  #   name: "Support"
+  #   url: "会社のURL等"
+  #   email: "sample@email.com"
+  license:
+    name: "MIT License"
+    url: "https://opensource.org/licenses/MIT"
+  version: "1.0.0"
+
+servers:
+  - url: "http://localhost:{port}"
+    description: "Local Development"
+    variables:
+      port:
+        enum: ["3000", "8080"]
+        default: "3000"
+  - url: "https://it1.example.com/v1"
+    description: "Integration Test"
+  - url: "https://stg.example.com/v1"
+    description: "Staging"
+  - url: "https://api.emaple.com/v1"
+    description: "Production"
+
+tags:
+  - name: "users"
+    description: "Userに関するもの"
+
+paths:
+  "/user/{userId}":
+    get:
+      summary: "ユーザー情報取得API"
+      description: "userIDを指定し、ユーザー情報を取得する"
+      tags: ["reviews"]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: "Success operation"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Users"
+      security: []
+    post:
+      summary: "新規ユーザー登録"
+      description: "特定の新しいユーザー登録API"
+      tags: ["reviews"]
+      parameters:
+        - name: userId
+          in: path
+          description: "User identifier"
+          required: true
+          schema: { type: string }
+      requestBody:
+        description: "Contents of user"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Users"
+      responses:
+        "201":
+          description: "Success operation"
+          headers:
+            location:
+              description: "New URL of created review"
+              schema: { type: string, format: url }
+        "400":
+          $ref: "#/components/responses/400-BadRequest"
+security:
+  - apikey_auth: []
+components:
+  schemas:
+    Users:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string }
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        type: { type: string }
+        message: { type: string }
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              code: { type: string }
+  responses:
+    400-BadRequest:
+      description: "Client side error"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  securitySchemes:
+    apikey_auth:
+      description: "API Key authorization"
+      type: apiKey
+      name: "X-Api-Key"
+      in: header
